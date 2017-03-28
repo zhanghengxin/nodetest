@@ -1,0 +1,55 @@
+var express = require('express');
+var router = express.Router();
+var fs = require("fs");
+var buf = new Buffer(1024);
+
+/* GET home page. */
+router.get('/', function(req, res, next) {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.render('index', { title: 'Express' });
+});
+
+router.get('/1', function(req, res, next) {
+	res.header("Access-Control-Allow-Origin", "*");
+
+	// 异步读取
+	fs.readFile('./test/1', function (err, data) {
+	   if (err) {
+	       return console.error(err);
+	   }
+	   console.log("异步读取: " + data.toString());
+	   res.send(data.toString());
+	});
+
+	//res.render('../text/1', { title: 'Express' });
+});
+
+router.get('/config', function(req, res, next) {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.render('config', { title: 'Express' });
+});
+
+//异步写入
+router.post('/config',function(req,res,err){
+	fs.readFile('./test/input', function (err, data) {
+		if (err) {
+			return console.error(err);
+		}
+		console.log("异步读取文件数据: " + data.toString());
+		var arr = data.toString().split(';');
+		console.log(arr);
+		arr[2] = ('Password='+req.body.password);
+		arr[4] = ('User ID='+req.body.userID);
+		arr[6] = ('Initial Catalog='+req.body.DBname);
+		arr[7] = ('Data Source='+req.body.DBlocal);
+		var str = arr.join(';');
+		fs.writeFile('./test/input', str,  function(err) {
+			if (err) {
+				return console.log(err);
+			}
+		});
+		console.log(data);
+	});
+});
+
+module.exports = router;
